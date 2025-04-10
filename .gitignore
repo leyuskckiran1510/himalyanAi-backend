@@ -1,0 +1,9 @@
+# virtual env
+.venv
+venv
+.env
+env
+
+
+*.db
+*.bash
