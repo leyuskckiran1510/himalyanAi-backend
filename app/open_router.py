@@ -10,46 +10,46 @@ from app.utils import normalize_ai_response
 from pydantic import BaseModel
 
 
-class __Message(BaseModel):
+class OR_Message(BaseModel):
     role: str
     content: str
     refusal: None | str
     reasoning: None | str
 
 
-class __Choice(BaseModel):
+class OR_Choice(BaseModel):
     logprobs: None | str
     finish_reason: str
     native_finish_reason: str
     index: int
-    message: __Message
+    message: OR_Message
 
 
-class __PromptTokensDetails(BaseModel):
+class OR_PromptTokensDetails(BaseModel):
     cached_tokens: int
 
 
-class __CompletionTokensDetails(BaseModel):
+class OR_CompletionTokensDetails(BaseModel):
     reasoning_tokens: int
 
 
-class __Usage(BaseModel):
+class OR_Usage(BaseModel):
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
-    prompt_tokens_details: __PromptTokensDetails
-    completion_tokens_details: __CompletionTokensDetails
+    prompt_tokens_details: OR_PromptTokensDetails
+    completion_tokens_details: OR_CompletionTokensDetails
 
 
-class __ChatCompletion(BaseModel):
+class OR_ResponseModel(BaseModel):
     id: str
     provider: str
     model: str
     object: str
     created: int
-    choices: list[__Choice]
+    choices: list[OR_Choice]
     system_fingerprint: str
-    usage: __Usage
+    usage: OR_Usage
 
 
 load_dotenv()
@@ -76,7 +76,7 @@ def summarize(text: str) -> str:
         _json = response.json()
         try:
             content = ""
-            for choice in __ChatCompletion(**_json).choices:
+            for choice in OR_ResponseModel(**_json).choices:
                 content += choice.message.content
             return normalize_ai_response(content)
         except Exception as e:

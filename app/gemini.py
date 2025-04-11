@@ -9,37 +9,37 @@ from pydantic import BaseModel
 from app.utils import normalize_ai_response
 
 
-class __Part(BaseModel):
+class GM_Part(BaseModel):
     text: str
 
 
-class __Content(BaseModel):
-    parts: list[__Part]
+class GM_Content(BaseModel):
+    parts: list[GM_Part]
     role: str
 
 
-class __Candidate(BaseModel):
-    content: __Content
+class GM_Candidate(BaseModel):
+    content: GM_Content
     finishReason: str
     avgLogprobs: float | None
 
 
-class __TokenDetail(BaseModel):
+class GM_TokenDetail(BaseModel):
     modality: str
     tokenCount: int
 
 
-class __UsageMetadata(BaseModel):
+class GM_UsageMetadata(BaseModel):
     promptTokenCount: int
     candidatesTokenCount: int
     totalTokenCount: int
-    promptTokensDetails: list[__TokenDetail]
-    candidatesTokensDetails: list[__TokenDetail]
+    promptTokensDetails: list[GM_TokenDetail]
+    candidatesTokensDetails: list[GM_TokenDetail]
 
 
 class GM_ResponseModel(BaseModel):
-    candidates: list[__Candidate]
-    usageMetadata: __UsageMetadata
+    candidates: list[GM_Candidate]
+    usageMetadata: GM_UsageMetadata
     modelVersion: str
 
 
