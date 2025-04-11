@@ -2,7 +2,7 @@ import pytest
 from flask import Flask, cli
 from flask_jwt_extended import decode_token
 from app import create_app, db
-from app.models import User, Summary
+from app.models import User, SummaryDb
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def test_fetch_user_history_with_entries(client):
 
     # Add summaries
     db.session.add(
-        Summary(user_id=user.id, summary_id="sum1", full_url="http://example.com", site_domain="example.com")
+        SummaryDb(user_id=user.id, summary_id="sum1", full_url="http://example.com", site_domain="example.com")
     )
     db.session.commit()
 

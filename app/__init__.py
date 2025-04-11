@@ -23,4 +23,8 @@ def create_app():
 
     app.register_blueprint(bp, url_prefix="/api")
 
+    @app.route("/")
+    def index2():
+        return "Welcome to Homepage"
+
     return app

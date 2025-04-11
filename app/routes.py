@@ -1,7 +1,7 @@
+from threading import Thread
 from flask import Blueprint, Flask, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app.models import db, User, Summary
-
+from app.models import db, User, SummaryDb
 from app.scraper import ai_summarize
 
 bp = Blueprint("api", __name__)
@@ -31,15 +31,15 @@ def authenticate_or_identify():
 def summarize():
     data = request.get_json()
     text = data.get("content")
-    summary = ai_summarize(text).model_dump_json()
-    return jsonify(summary), 200
+    summary = ai_summarize(text)
+    return jsonify(summary.model_dump_json()), 200
 
 
 @bp.route("/fetch_user_history", methods=["GET"])
 @jwt_required()
 def fetch_user_history():
     user_id = get_jwt_identity()
-    summaries = Summary.query.filter_by(user_id=user_id).order_by(Summary.created_at.desc()).all()
+    summaries = SummaryDb.query.filter_by(user_id=user_id).order_by(SummaryDb.created_at.desc()).all()
 
     history = [
         {
