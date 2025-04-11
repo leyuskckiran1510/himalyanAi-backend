@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, Flask, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, Summary
 
@@ -22,7 +22,7 @@ def authenticate_or_identify():
         db.session.add(user)
         db.session.commit()
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({"access_token": access_token}), 200
 
 
@@ -31,7 +31,8 @@ def authenticate_or_identify():
 def summarize():
     data = request.get_json()
     text = data.get("content")
-    return jsonify(ai_summarize(text)), 200
+    summary = ai_summarize(text).model_dump_json()
+    return jsonify(summary), 200
 
 
 @bp.route("/fetch_user_history", methods=["GET"])
