@@ -44,7 +44,6 @@ def test_summarize_success(client):
     response = client.post(
         "/api/summarize", json={"content": "This is test content."}, headers=headers, base_url="https://localhost"
     )
-    print(response.text, response.request.__dict__, response.get_json())
     assert response.status_code == 200, f"Failed with: {response.get_json()}"
     data = response.get_json()
     assert "summary" in data or "notes" in data or "refrences" in data
@@ -61,7 +60,6 @@ def test_fetch_user_history_empty(client):
         "/api/authenticate_or_identify", json={"hash": "history-user"}, base_url="https://localhost"
     )
     token = auth_resp.get_json()["access_token"]
-    print(token)
 
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/api/fetch_user_history", headers=headers, base_url="https://localhost")

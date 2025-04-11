@@ -3,8 +3,10 @@ from flask import Blueprint, Flask, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, SummaryDb
 from app.scraper import ai_summarize
+from flask_cors import CORS
 
 bp = Blueprint("api", __name__)
+CORS(bp)
 
 
 @bp.route("/authenticate_or_identify", methods=["POST"])
@@ -31,8 +33,10 @@ def authenticate_or_identify():
 def summarize():
     data = request.get_json()
     text = data.get("content")
+    domain = data.get("domain")
+    full = data.get("full")
     summary = ai_summarize(text)
-    return jsonify(summary.model_dump_json()), 200
+    return jsonify(summary.dict()), 200
 
 
 @bp.route("/fetch_user_history", methods=["GET"])

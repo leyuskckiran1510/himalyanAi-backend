@@ -19,15 +19,18 @@ def allHrefs(html: str) -> list[str]:
 
 
 class Summary(BaseModel):
-    error: bool = False
     summary: str
     notes: list[str]
-    refrences: list[dict[str, str]]
+    references: list[dict[str, str]]
     error_msg: str | None = None
+    error: bool = False
+    activeTime: int | None = None
+    backgroundTime: int | None = None
 
 
 def ai_summarize(text: str) -> Summary:
     try:
-        return Summary(**json.loads(summarize(text)))
-    except Exception:
-        return Summary(error=True, summary="", notes=[], refrences=[], error_msg="Oops!! Failed to summarize.")
+        data = json.loads(summarize(text))
+        return Summary(**data)
+    except Exception as e:
+        return Summary(error=True, summary="", notes=[], refrences=[], error_msg=f"Oops!! Failed to summarize. {e}")

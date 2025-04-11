@@ -8,3 +8,7 @@ email-validator
 python-dotenv
 beautifulsoup4
 pytest
+requests
+cryptography
+flask-cors
+flask-migrate

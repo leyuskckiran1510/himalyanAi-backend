@@ -9,3 +9,4 @@ env
 *.bash
 
 __pycache__
+migrations/
