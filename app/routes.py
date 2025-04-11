@@ -1,7 +1,8 @@
-from flask import Blueprint, Response, request, jsonify
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, Summary
-from urllib.parse import urlparse
+
+from app.scraper import ai_summarize
 
 bp = Blueprint("api", __name__)
 
@@ -28,8 +29,9 @@ def authenticate_or_identify():
 @bp.route("/summarize", methods=["POST"])
 @jwt_required()
 def summarize():
-    data = request.get_data(as_text=True)
-    return Response(data)
+    data = request.get_json()
+    text = data.get("content")
+    return jsonify(ai_summarize(text)), 200
 
 
 @bp.route("/fetch_user_history", methods=["GET"])

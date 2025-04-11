@@ -14,6 +14,15 @@
 
 # avilable apis
 
-- `/authenticate_or_identify` : [POST] -> send a random hash per extention install 
-- `/summarize` : [POST] -> send the whole html content, and wait for promise
-- `/fetch_user_history`: [GET] -> responses the D3 friendly json later on, [tommrow]
+- `api/authenticate_or_identify` : [POST] -> send a random hash per extention install 
+- `api/summarize` : [POST] -> send the whole html content, and wait for promise
+    -- response
+    ```json
+    {
+        "summary":"text only", -> div-body
+        "notes":["text","text"], ->  div>ul>li*
+        "refrences":[{"name":"link"}] -> div>li>a>hrefs 
+    }
+    ```
+- `api/fetch_user_history`: [GET] -> responses the D3 friendly json later on, [tommrow]
+

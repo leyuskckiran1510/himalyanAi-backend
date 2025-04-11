@@ -11,3 +11,7 @@ def sanitize_output(data: dict) -> dict:
 def generate_password(length: int) -> str:
     non_white_spaces = printable.strip()
     return "".join(choices(non_white_spaces, k=length))
+
+
+def normalize_ai_response(text: str) -> str:
+    return text.replace("```json", "", 1).rstrip("```").strip()
