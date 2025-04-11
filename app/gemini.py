@@ -114,41 +114,5 @@ Expected json output from gemenie
 """
 
 if __name__ == "__main__":
-    print(
-        summarize(
-            """
-                    # Extracting href Attributes with BeautifulSoup
-
-## Summary
-- **Method**: Use `get('href')` on anchor tags to extract URL values
-- **Key Steps**:
-  1. Parse HTML with BeautifulSoup
-  2. Find all `<a>` tags using `find_all('a')`
-  3. Access href values using `.get('href')`
-  4. Filter links using attribute selectors (e.g., `href^=\"https://\"`)
-
-## Code Example
-```python
-from bs4 import BeautifulSoup
-
-html = '''<a href=\"https://example.com\">Link</a>'''
-soup = BeautifulSoup(html, 'html.parser')
-
-for link in soup.find_all('a'):
-    print(link.get('href'))  # Output: https://example.com
-```
-
-## Additional Notes
-1. Always check if `href` exists before accessing to avoid `NoneType` errors
-2. Use `urljoin` to handle relative URLs (e.g., `/page.html`)
-3. Combine with regex for advanced pattern matching in href attributes
-
-## References
-- [GeeksForGeeks: Link Scraping Guide](https://www.geeksforgeeks.org/beautifulsoup-scraping-link-from-html)
-- [Geek Docs: href Attribute Extraction](https://geek-docs.com/beautifulsoup/beautifulsoup-questions/119_beautifulsoup_python_beautifulsoup_how_to_get_href_attribute_of_a_element.html)
-- [Techjury Tutorial](https://techjury.net/blog/how-to-get-an-href-attribute-using-beautifulsoup)
-
-
-"""
-        )
-    )
+    # with open("./app/input.txt", "r") as fp:
+    print(summarize("https://flask.palletsprojects.com/en/stable/testing/"))

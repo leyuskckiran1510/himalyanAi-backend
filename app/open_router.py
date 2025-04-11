@@ -127,45 +127,5 @@ focusing on the common techniques they all mention.\n\nI think that's all. Time 
 
 
 if __name__ == "__main__":
-    summary = summarize(
-        """
-    get('href') method returns the value of the href attribute of the anchor tag.. By ...
-
-
-    Only include results for this site
-    Hide site from these results
-    Share feedback about this site
-
-    GeeksForGeeks
-
-    https://www.geeksforgeeks.org › beautifulsoup-scraping-link-from-html
-
-    BeautifulSoup - Scraping Link from HTML - GeeksforGeeks
-    bs4 (BeautifulSoup): It is a library in python which makes it easy to scrape information from web pages, and helps in extracting the data from HTML and XML files. This library needs to be downloaded externally as it does not come readily with Python package. ... # find all the anchor tags with "href" # attribute starting with "https://" for ...
-
-
-    Only include results for this site
-    Hide site from these results
-    Share feedback about this site
-
-    极客教程
-
-    https://geek-docs.com › beautifulsoup › beautifulsoup-questions › 119_beautifulsoup_python_beautifulsoup_how_to_get_href_attribute_of_a_element.html
-
-    BeautifulSoup ：如何获取'a'元素的'href'属性|极客教程
-    BeautifulSoup ：如何获取'a'元素的'href'属性 在本文中，我们将介绍如何使用Python的BeautifulSoup库来获取HTML代码中的'a'元素的'href'属性。 阅读更多：BeautifulSoup 教程 什么是BeautifulSoup？ BeautifulSoup是一个用于解析HTML和XML等标记语言的Python库。它可以很方便地从网页中提取所需的数据
-
-
-    Only include results for this site
-    Hide site from these results
-    Share feedback about this site
-
-    Techjury
-
-    https://techjury.net › blog › how-to-get-an-href-attribute-using-beautifulsoup
-
-
-              """
-    )
-
-    print(summary)
+    with open("./app/input.txt", "r") as fp:
+        print(summarize(fp.read()))

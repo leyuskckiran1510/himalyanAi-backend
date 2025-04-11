@@ -15,6 +15,9 @@
 # avilable apis
 
 - `api/authenticate_or_identify` : [POST] -> send a random hash per extention install 
+    ```json
+    
+    ```
 - `api/summarize` : [POST] -> send the whole html content, and wait for promise
     -- response
     ```json
