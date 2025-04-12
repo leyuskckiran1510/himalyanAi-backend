@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from app.models import db, User, SummaryDb
 from app.scraper import Summary, ai_summarize
 from flask_cors import CORS
+from flask import send_from_directory
 from app import ipfsclient
 from datetime import datetime
 import json
@@ -38,32 +39,18 @@ def authenticate_or_identify():
 def upload_ipfs(user_id, summary, domain, full_url):
     with get_app().app_context():
         try:
-
             summary_json = summary.model_dump_json()
-            print(summary_json)
             ipfs_hash = ipfsclient.add_json(summary_json)
-
-            print(
-                {
-                    "user_id": user_id,
-                    "summary_id": ipfs_hash,
-                    "full_url": full_url,
-                    "site_domain": domain,
-                }
-            )
-
             new_summary = SummaryDb(
                 user_id=user_id,
                 summary_id=ipfs_hash,
                 full_url=full_url,
                 site_domain=domain,
-                created_at= one_day_ago_utc,
-                
+                created_at=one_day_ago_utc,
             )
 
             db.session.add(new_summary)
             db.session.commit()
-
             return True
         except Exception as e:
             print(f"Error saving to IPFS/database: {str(e)}")
@@ -84,9 +71,7 @@ def summarize():
         summary = ai_summarize(text)
         user_id = get_jwt_identity()
 
-        Thread(
-            target=upload_ipfs, args=(user_id, summary, domain, full_url), daemon=True
-        ).start()
+        Thread(target=upload_ipfs, args=(user_id, summary, domain, full_url), daemon=True).start()
         return jsonify(summary.model_dump()), 200
 
     except Exception as e:
@@ -150,10 +135,7 @@ def fetch_user_history():
             }
         )
 
-    result = [
-        {"date": date, "summaries": summaries}
-        for date, summaries in date_grouped.items()
-    ]
+    result = [{"date": date, "summaries": summaries} for date, summaries in date_grouped.items()]
 
     return jsonify(result), 200
 
@@ -200,9 +182,7 @@ def date_summaries():
             except json.JSONDecodeError:
                 result[date_param][domain][summary.full_url] = str(summary_content)
         except Exception as e:
-            result[date_param][domain][summary.full_url] = {
-                "error": f"Failed to retrieve content: {str(e)}"
-            }
+            result[date_param][domain][summary.full_url] = {"error": f"Failed to retrieve content: {str(e)}"}
 
     return jsonify(result), 200
 
@@ -221,9 +201,7 @@ def db_health():
                     "status": "healthy",
                     "user_count": user_count,
                     "summary_count": summary_count,
-                    "database_uri": current_app.config.get(
-                        "SQLALCHEMY_DATABASE_URI", ""
-                    ).split("://")[0],
+                    "database_uri": current_app.config.get("SQLALCHEMY_DATABASE_URI", "").split("://")[0],
                 }
             ),
             200,
