@@ -8,6 +8,7 @@ from app.config import Config
 from flask_cors import CORS
 from flask_migrate import Migrate
 import ipfsapi
+from functools import lru_cache
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -18,23 +19,33 @@ limiter = Limiter(
 
 ipfsclient = ipfsapi.Client(host="localhost", port=5001)
 
+@lru_cache()
+def get_app():
+    return Flask(__name__)
 
 def create_app():
-    app = Flask(__name__)
+    app = get_app()
     app.config.from_object(Config)
-    db.init_app(app)
+    print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+
+    # Initialize extensions
+    db.init_app(app)  # This line is missing
     jwt.init_app(app)
     limiter.init_app(app)
     # Talisman(app, content_security_policy=None)  # Sets secure headers
 
     from app.routes import bp
-
     app.register_blueprint(bp, url_prefix="/api")
     CORS(app)
+    
+    # Initialize the database
+    with app.app_context():
+        db.create_all()
+    
     Migrate(app, db)
 
     @app.route("/")
     def index2():
         return "Welcome to Homepage"
-
+    
     return app

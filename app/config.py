@@ -1,9 +1,12 @@
 from app.utils import generate_password
+import os
+
 
 
 class Config:
     SECRET_KEY = generate_password(64)
-    SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'data.db')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = generate_password(64)
     JWT_TOKEN_LOCATION = ["headers"]

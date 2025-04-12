@@ -5,7 +5,6 @@ venv
 env
 
 
-*.db
 *.bash
 
 __pycache__

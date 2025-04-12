@@ -93,3 +93,26 @@ def test_fetch_user_history_with_entries(client):
     data = response.get_json()
     assert isinstance(data, list)
     assert data[0]["summary_id"] == "sum1"
+
+@bp.route("/db_health", methods=["GET"])
+def db_health():
+    """Endpoint to check if the database is working properly"""
+    try:
+        # Try to execute a simple query
+        db.session.execute(db.select(User).limit(1))
+        
+        # Get count of users and summaries
+        user_count = db.session.query(db.func.count(User.id)).scalar()
+        summary_count = db.session.query(db.func.count(SummaryDb.id)).scalar()
+        
+        return jsonify({
+            "status": "healthy",
+            "user_count": user_count,
+            "summary_count": summary_count,
+            "database_uri": app.config.get("SQLALCHEMY_DATABASE_URI", "").split("://")[0]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e)
+        }), 500
