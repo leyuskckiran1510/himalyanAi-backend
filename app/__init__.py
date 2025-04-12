@@ -7,6 +7,7 @@ from flask_talisman import Talisman
 from app.config import Config
 from flask_cors import CORS
 from flask_migrate import Migrate
+import ipfsapi
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -14,6 +15,8 @@ limiter = Limiter(
     key_func=get_remote_address,
     storage_uri="memory://",
 )
+
+ipfsclient = ipfsapi.Client(host="localhost", port=5001)
 
 
 def create_app():

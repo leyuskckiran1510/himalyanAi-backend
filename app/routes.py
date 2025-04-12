@@ -2,8 +2,10 @@ from threading import Thread
 from flask import Blueprint, Flask, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, SummaryDb
-from app.scraper import ai_summarize
+from app.scraper import Summary, ai_summarize
 from flask_cors import CORS
+from app import ipfsclient
+
 
 bp = Blueprint("api", __name__)
 CORS(bp)
@@ -28,6 +30,19 @@ def authenticate_or_identify():
     return jsonify({"access_token": access_token}), 200
 
 
+def upload_ipfs(user, summary: Summary, domain: str, full: str):
+    db.session.add(
+        SummaryDb(
+            user_id=user.id,
+            summary_id=ipfsclient.add_json(summary.model_dump_json())["Hash"],
+            full_url=full,
+            site_domain=domain,
+        )
+    )
+    db.session.commit()
+    return
+
+
 @bp.route("/summarize", methods=["POST"])
 @jwt_required()
 def summarize():
@@ -36,7 +51,22 @@ def summarize():
     domain = data.get("domain")
     full = data.get("full")
     summary = ai_summarize(text)
-    return jsonify(summary.dict()), 200
+    user = get_jwt_identity()
+    Thread(
+        target=upload_ipfs,
+        args=(user, summary, domain, full),
+    )
+    return jsonify(summary.model_dump()), 200
+
+
+@bp.route("/discard", methods=["POST"])
+@jwt_required()
+def discard():
+    data = request.get_json()
+    full_url = data.get("of")
+    uid = get_jwt_identity()
+    SummaryDb.query.filter_by(user_id=uid, full_url=full_url).delete()
+    return jsonify({"msg": f"[{full_url}]: summary history discarded. "}), 200
 
 
 @bp.route("/fetch_user_history", methods=["GET"])
