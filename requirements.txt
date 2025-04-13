@@ -12,3 +12,4 @@ requests
 cryptography
 flask-cors
 flask-migrate
+ipfsapi
