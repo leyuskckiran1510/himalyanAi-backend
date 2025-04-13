@@ -9,10 +9,10 @@ from datetime import datetime
 import json
 from app import get_app
 from datetime import timedelta
-from app.gemini import summarize
+from app.gemini import summarize as gemini_summarize
 from app.config import COMPLETE_WHOLE_DAY_SUMMARY
 
-one_day_ago_utc = datetime.utcnow() - timedelta(days=2)
+one_day_ago_utc = datetime.utcnow()
 
 bp = Blueprint("api", __name__)
 CORS(bp)
@@ -150,7 +150,7 @@ def fetch_user_history():
 
 
 @bp.route("/summary_of_day", methods=["GET"])
-@jwt_required()
+@jwt_required(refresh=True)
 def summarize_the_day():
     user_id = get_jwt_identity()
     today = datetime.utcnow().strftime("%Y-%m-%d")
@@ -178,7 +178,7 @@ def summarize_the_day():
     combined_text = "\n\n".join(all_texts)
 
     try:
-        summarized = summarize(combined_text, COMPLETE_WHOLE_DAY_SUMMARY)
+        summarized = gemini_summarize(combined_text, COMPLETE_WHOLE_DAY_SUMMARY)
     except Exception as e:
         return jsonify({"error": f"Failed to summarize content: {str(e)}"}), 500
 
