@@ -109,14 +109,14 @@ header {
     /* border: 5px solid white; */
     text-align: center;
 
-    width: 50%;
-    max-width: 700px;
+    width: 70%;
+    max-width: 800px;
     display: flex;
     flex-direction: column;
     gap: 3rem;
 }
 h1 {
-    font-size: 5.5rem;
+    font-size: 4.5rem;
     font-weight: 500;
 }
 
