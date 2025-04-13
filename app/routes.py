@@ -88,6 +88,17 @@ def summarize():
             500,
         )
 
+def cat_ipfs_content(ipfs_hash):
+    import requests
+    
+    url = f"http://localhost:5001/api/v0/cat?arg={ipfs_hash}"
+    response = requests.post(url)  # Explicitly use POST method
+    
+    if response.status_code == 200:
+        return response.content
+    else:
+        raise Exception(f"Failed to retrieve content: {response.status_code} {response.text}")
+
 
 @bp.route("/discard", methods=["POST"])
 @jwt_required()
@@ -104,88 +115,40 @@ def discard():
 @jwt_required()
 def fetch_user_history():
     user_id = get_jwt_identity()
-    date_param = request.args.get("date")
-
     query = SummaryDb.query.filter_by(user_id=user_id)
-    if date_param:
-        try:
-            target_date = datetime.strptime(date_param, "%Y-%m-%d").date()
-
-            query = query.filter(db.func.date(SummaryDb.created_at) == target_date)
-        except ValueError:
-            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
-
     summaries = query.order_by(SummaryDb.created_at.desc()).all()
 
-    if not summaries and date_param:
-        return jsonify({"message": f"No summaries found for date {date_param}"}), 404
-
+    # Create nested dictionary structure
     date_grouped = {}
     for s in summaries:
         date_str = s.created_at.strftime("%Y-%m-%d")
+        
+        # Initialize date if not exists
         if date_str not in date_grouped:
-            date_grouped[date_str] = []
-
-        date_grouped[date_str].append(
-            {
-                "summary_id": s.summary_id,
-                "full_url": s.full_url,
-                "site_domain": s.site_domain,
-                "created_at": s.created_at.isoformat(),
-            }
-        )
-
-    result = [{"date": date, "summaries": summaries} for date, summaries in date_grouped.items()]
-
-    return jsonify(result), 200
-
-
-@bp.route("/date_summaries", methods=["GET"])
-@jwt_required()
-def date_summaries():
-    user_id = get_jwt_identity()
-    date_param = request.args.get("date")
-
-    if not date_param:
-        return (
-            jsonify({"error": "Date parameter is required (format: YYYY-MM-DD)"}),
-            400,
-        )
-
-    try:
-        target_date = datetime.strptime(date_param, "%Y-%m-%d").date()
-    except ValueError:
-        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
-
-    summaries = (
-        SummaryDb.query.filter_by(user_id=user_id)
-        .filter(db.func.date(SummaryDb.created_at) == target_date)
-        .order_by(SummaryDb.created_at.desc())
-        .all()
-    )
-
-    if not summaries:
-        return jsonify({"message": f"No summaries found for {date_param}"}), 404
-
-    result = {date_param: {}}
-
-    for summary in summaries:
-        domain = summary.site_domain
-        if domain not in result[date_param]:
-            result[date_param][domain] = {}
-
-        print(summary)
+            date_grouped[date_str] = {}
+        
+        # Initialize domain if not exists
+        if s.site_domain not in date_grouped[date_str]:
+            date_grouped[date_str][s.site_domain] = {}
+        
         try:
-            summary_content = ipfsclient.cat(summary.summary_id)
+            summary_content = cat_ipfs_content(s.summary_id)
             try:
+                # Try to parse as JSON
                 summary_json = json.loads(summary_content)
-                result[date_param][domain][summary.full_url] = summary_json
-            except json.JSONDecodeError:
-                result[date_param][domain][summary.full_url] = str(summary_content)
+                date_grouped[date_str][s.site_domain][s.full_url] = summary_json
+            except (json.JSONDecodeError, TypeError):
+                # If not valid JSON, use as string
+                date_grouped[date_str][s.site_domain][s.full_url] = {"content": str(summary_content)}
         except Exception as e:
-            result[date_param][domain][summary.full_url] = {"error": f"Failed to retrieve content: {str(e)}"}
-    print(result)
-    return jsonify(result), 200
+            # Handle IPFS retrieval errors
+            date_grouped[date_str][s.site_domain][s.full_url] = {"error": f"Failed to retrieve content: {str(e)}"}
+    from pprint import pprint
+    pprint(date_grouped)
+
+    # Sort dates in descending order (newest first)
+    return jsonify(date_grouped), 200
+
 
 
 @bp.route("/db_health", methods=["GET"])
@@ -209,3 +172,5 @@ def db_health():
         )
     except Exception as e:
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
+
