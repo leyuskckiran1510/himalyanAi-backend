@@ -174,6 +174,7 @@ def date_summaries():
         if domain not in result[date_param]:
             result[date_param][domain] = {}
 
+        print(summary)
         try:
             summary_content = ipfsclient.cat(summary.summary_id)
             try:
@@ -183,7 +184,7 @@ def date_summaries():
                 result[date_param][domain][summary.full_url] = str(summary_content)
         except Exception as e:
             result[date_param][domain][summary.full_url] = {"error": f"Failed to retrieve content: {str(e)}"}
-
+    print(result)
     return jsonify(result), 200
 
 
