@@ -2,7 +2,6 @@ from app.utils import generate_password
 import os
 
 
-
 class Config:
     SECRET_KEY = generate_password(64)
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -11,7 +10,7 @@ class Config:
     JWT_SECRET_KEY = generate_password(64)
     JWT_TOKEN_LOCATION = ["headers"]
     JWT_COOKIE_SECURE = True
-    JWT_ACCESS_TOKEN_EXPIRES = 3600
+    JWT_ACCESS_TOKEN_EXPIRES = 31536000  # for one year
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
 
