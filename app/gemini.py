@@ -48,13 +48,13 @@ __CHAT_AI_API = f"https://generativelanguage.googleapis.com/v1beta/models/gemini
 __CHAT_HEADERS = {"Content-Type": "application/json"}
 
 
-def summarize(text: str) -> str:
+def summarize(text: str, prompt_choise: str = AI_PROMPT) -> str:
     data = {
         "contents": [
             {
                 "parts": [
                     {
-                        "text": AI_PROMPT + text,
+                        "text": prompt_choise + text,
                     },
                 ]
             }

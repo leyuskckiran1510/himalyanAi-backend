@@ -1,15 +1,16 @@
 from threading import Thread
-from flask import Blueprint, Flask, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, SummaryDb
-from app.scraper import Summary, ai_summarize
+from app.scraper import ai_summarize
 from flask_cors import CORS
-from flask import send_from_directory
 from app import ipfsclient
 from datetime import datetime
 import json
 from app import get_app
 from datetime import timedelta
+from app.gemini import summarize
+from app.config import COMPLETE_WHOLE_DAY_SUMMARY
 
 one_day_ago_utc = datetime.utcnow() - timedelta(days=2)
 
@@ -88,12 +89,13 @@ def summarize():
             500,
         )
 
+
 def cat_ipfs_content(ipfs_hash):
     import requests
-    
+
     url = f"http://localhost:5001/api/v0/cat?arg={ipfs_hash}"
     response = requests.post(url)  # Explicitly use POST method
-    
+
     if response.status_code == 200:
         return response.content
     else:
@@ -122,15 +124,15 @@ def fetch_user_history():
     date_grouped = {}
     for s in summaries:
         date_str = s.created_at.strftime("%Y-%m-%d")
-        
+
         # Initialize date if not exists
         if date_str not in date_grouped:
             date_grouped[date_str] = {}
-        
+
         # Initialize domain if not exists
         if s.site_domain not in date_grouped[date_str]:
             date_grouped[date_str][s.site_domain] = {}
-        
+
         try:
             summary_content = cat_ipfs_content(s.summary_id)
             try:
@@ -143,12 +145,44 @@ def fetch_user_history():
         except Exception as e:
             # Handle IPFS retrieval errors
             date_grouped[date_str][s.site_domain][s.full_url] = {"error": f"Failed to retrieve content: {str(e)}"}
-    from pprint import pprint
-    pprint(date_grouped)
-
     # Sort dates in descending order (newest first)
     return jsonify(date_grouped), 200
 
+
+@bp.route("/summary_of_day", methods=["GET"])
+@jwt_required()
+def summarize_the_day():
+    user_id = get_jwt_identity()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    # Fetch today's summaries for this user
+    query = SummaryDb.query.filter_by(user_id=user_id)
+    summaries = query.order_by(SummaryDb.created_at.desc()).all()
+
+    all_texts = []
+    for s in summaries:
+        if s.created_at.strftime("%Y-%m-%d") == today:
+            try:
+                content = cat_ipfs_content(s.summary_id)
+                if isinstance(content, str):
+                    all_texts.append(content)
+                else:
+                    all_texts.append(str(content))
+            except Exception as e:
+                continue
+
+    if not all_texts:
+        return jsonify({"message": "No summaries found for today."}), 404
+
+    # Combine all texts and send for summarization
+    combined_text = "\n\n".join(all_texts)
+
+    try:
+        summarized = summarize(combined_text, COMPLETE_WHOLE_DAY_SUMMARY)
+    except Exception as e:
+        return jsonify({"error": f"Failed to summarize content: {str(e)}"}), 500
+
+    return jsonify({"date": today, "summary": summarized}), 200
 
 
 @bp.route("/db_health", methods=["GET"])
@@ -172,5 +206,3 @@ def db_health():
         )
     except Exception as e:
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
-
-

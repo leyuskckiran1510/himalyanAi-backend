@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 from pydantic import BaseModel
 
 from app.gemini import summarize
+from app.config import AI_PROMPT
 
 
 def innerText(html: str) -> str:
@@ -30,7 +31,7 @@ class Summary(BaseModel):
 
 def ai_summarize(text: str) -> Summary:
     try:
-        data = json.loads(summarize(text))
+        data = json.loads(summarize(text, AI_PROMPT))
         return Summary(**data)
     except Exception as e:
         return Summary(error=True, summary="", notes=[], refrences=[], error_msg=f"Oops!! Failed to summarize. {e}")

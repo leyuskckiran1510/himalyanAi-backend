@@ -50,11 +50,43 @@ The output must follow this JSON format exactly:
         // additional references as needed
     ]
 }
+```
 Failure to follow this format exactly, or including any additional text outside the JSON structure, may lead to unexpected results.
 
 
 Now, here is the content,
 
+
+
+"""
+
+
+COMPLETE_WHOLE_DAY_SUMMARY = """
+I will provide you with bunch of summaries of differne sites in following format
+
+
+```json
+{
+    "summary": "text only",
+    "notes": [
+        "text1",
+        "text2"
+        // additional notes as needed
+    ],
+    "references": [
+        {
+            "name": "Source Title (if available)",
+            "link": "URL"
+        }
+        // additional references as needed
+    ]
+}
+```
+
+their will be any such json stacked on each other, 
+your job go through it all and summarize it into nice readable content.
+
+here is the summaries:-
 
 
 """
